@@ -194,21 +194,21 @@ def extract_text_from_pdf(pdf_path):
     try:
         doc = fitz.open(pdf_path)
         markdown_pages = []
-        
+
         for page_num in range(len(doc)):
             page = doc[page_num]
-            
+
             # Render page to image
             mat = fitz.Matrix(PDF_DPI_SCALE, PDF_DPI_SCALE)
             pix = page.get_pixmap(matrix=mat)
-            
+
             # Save temporary image
             temp_image_path = os.path.join(
                 app.config['UPLOAD_FOLDER'],
                 f'temp_page_{uuid.uuid4()}.png'
             )
             pix.save(temp_image_path)
-            
+
             try:
                 # Extract text from image
                 page_markdown = extract_text_from_image(temp_image_path)
@@ -217,11 +217,17 @@ def extract_text_from_pdf(pdf_path):
                 # Clean up temp image
                 if os.path.exists(temp_image_path):
                     os.remove(temp_image_path)
-        
+
         doc.close()
-        
-        # Combine pages with separator
-        return f"\n\n{PDF_PAGE_SEPARATOR}\n\n".join(markdown_pages)
+
+        # Combine pages with separator (skip separator before first page)
+        result = []
+        for i, page_content in enumerate(markdown_pages):
+            if i > 0:  # Add separator before page 2 and onwards
+                result.append(f"\n\n---------- Page {i + 1} ----------\n\n")
+            result.append(page_content)
+
+        return ''.join(result)
     
     except Exception as e:
         raise Exception(f"Failed to process PDF: {str(e)}")
