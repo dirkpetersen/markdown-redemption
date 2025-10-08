@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ app_name }}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/logo.svg') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header class="app-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Logo" class="logo">
+                    <div class="title-group">
+                        <h1 class="app-name">{{ app_name }}</h1>
+                        <p class="app-tagline">{{ app_tagline }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash-message flash-{{ category }}">
+                                <span class="flash-icon">
+                                    {% if category == 'error' %}⚠{% elif category == 'success' %}✓{% elif category == 'warning' %}⚡{% else %}ℹ{% endif %}
+                                </span>
+                                <span class="flash-text">{{ message }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        <div class="container">
+            <div class="footer-content">
+                <p class="footer-text">
+                    {{ app_name }} uses advanced vision-language models to extract text from images and PDFs.
+                    <br>
+                    <small>Files are automatically deleted after {{ cleanup_hours|default(24) }} hours.</small>
+                </p>
+                <div class="footer-links">
+                    <a href="https://github.com/yourusername/markdown-redemption" target="_blank" rel="noopener">GitHub</a>
+                    <span>•</span>
+                    <a href="https://github.com/yourusername/markdown-redemption#privacy" target="_blank" rel="noopener">Privacy</a>
+                    <span>•</span>
+                    <a href="https://github.com/yourusername/markdown-redemption#how-it-works" target="_blank" rel="noopener">How It Works</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Upload - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="upload-page">
+    <div class="hero-section">
+        <h2>Transform Documents into Markdown</h2>
+        <p class="hero-description">
+            Upload images or PDFs and let AI extract the text into clean, portable Markdown format.
+        </p>
+    </div>
+
+    <form id="upload-form" action="{{ url_for('upload_files') }}" method="POST" enctype="multipart/form-data">
+        <div id="drop-zone" class="drop-zone">
+            <div class="drop-zone-content">
+                <div class="upload-icon">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                </div>
+                <h3 class="drop-zone-title">Drag & Drop Files Here</h3>
+                <p class="drop-zone-subtitle">or click to browse your computer</p>
+                <p class="drop-zone-info">
+                    Supported formats: {{ allowed_extensions }}<br>
+                    Maximum {{ max_files }} files • {{ max_size_mb }}MB per file
+                </p>
+            </div>
+            <input type="file" id="file-input" name="files[]" multiple accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.pdf" style="display: none;">
+        </div>
+
+        <div id="file-list" class="file-list" style="display: none;">
+            <div class="file-list-header">
+                <h4>Selected Files (<span id="file-count">0</span>)</h4>
+                <button type="button" id="clear-all" class="btn-text">Clear All</button>
+            </div>
+            <div id="file-items" class="file-items"></div>
+            <div class="file-list-footer">
+                <span id="total-size">Total: 0 B</span>
+            </div>
+        </div>
+
+        <div class="action-section">
+            <button type="submit" id="submit-btn" class="btn btn-primary" disabled>
+                <span>Redeem Documents</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+        </div>
+    </form>
+
+    <div class="info-cards">
+        <div class="info-card">
+            <div class="info-card-icon">🔓</div>
+            <h4>Liberation</h4>
+            <p>Free your text from locked PDFs and image formats</p>
+        </div>
+        <div class="info-card">
+            <div class="info-card-icon">🤖</div>
+            <h4>AI-Powered</h4>
+            <p>Advanced vision models understand document structure</p>
+        </div>
+        <div class="info-card">
+            <div class="info-card-icon">📝</div>
+            <h4>Clean Output</h4>
+            <p>Get properly formatted Markdown with preserved structure</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/upload.js') }}"></script>
+{% endblock %}

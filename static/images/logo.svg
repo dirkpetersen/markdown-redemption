@@ -1,0 +1,36 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Oregon State Beaver Theme: Orange and Black -->
+
+  <!-- Beaver silhouette integrated with document -->
+  <g id="beaver-body">
+    <!-- Beaver head/body simplified -->
+    <ellipse cx="32" cy="28" rx="12" ry="14" fill="#000000"/>
+    <!-- Beaver tail (flat, iconic beaver tail) -->
+    <path d="M 32 38 Q 28 42 26 48 L 38 48 Q 36 42 32 38 Z" fill="#000000"/>
+    <!-- Inner tail texture -->
+    <path d="M 28 44 L 36 44 M 27 46 L 37 46" stroke="#D73F09" stroke-width="1" opacity="0.5"/>
+  </g>
+
+  <!-- Beaver ears -->
+  <circle cx="26" cy="22" r="3" fill="#000000"/>
+  <circle cx="38" cy="22" r="3" fill="#000000"/>
+
+  <!-- Beaver teeth (holding document) -->
+  <rect x="30" y="30" width="4" height="4" fill="#FFFFFF"/>
+
+  <!-- Document being "redeemed" by beaver -->
+  <g id="document">
+    <rect x="20" y="32" width="24" height="20" rx="2" fill="none" stroke="#D73F09" stroke-width="2.5"/>
+    <!-- Markdown hash symbol on document -->
+    <text x="32" y="45" text-anchor="middle" font-family="monospace" font-size="10" font-weight="bold" fill="#D73F09">#</text>
+  </g>
+
+  <!-- Orange accent arc (liberation theme) -->
+  <path d="M 12 32 Q 32 10 52 32" stroke="#D73F09" stroke-width="2" fill="none" opacity="0.4" stroke-dasharray="4 2"/>
+
+  <!-- Small stars/sparkles for "redemption" effect -->
+  <circle cx="14" cy="24" r="1.5" fill="#D73F09" opacity="0.7"/>
+  <circle cx="50" cy="26" r="1.5" fill="#D73F09" opacity="0.7"/>
+  <circle cx="18" cy="18" r="1" fill="#D73F09" opacity="0.5"/>
+  <circle cx="46" cy="20" r="1" fill="#D73F09" opacity="0.5"/>
+</svg>
