@@ -4,6 +4,9 @@
 
 Transform locked documents into clean, portable Markdown using vision-language AI models. The Markdown Redemption is a Flask-based web application that liberates text from images and PDFs, converting them to beautifully formatted Markdown files.
 
+<img width="558" height="500" alt="image" src="https://github.com/user-attachments/assets/2845ddff-117b-4f1e-951c-043e540b6986" />
+
+
 ## Features
 
 - 🔓 **Liberation**: Free your text from locked PDFs and image formats
