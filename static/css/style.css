@@ -184,7 +184,7 @@ body {
     background-color: var(--color-surface);
     border: 2px dashed var(--color-border);
     border-radius: var(--border-radius);
-    padding: 32px 32px;  /* Reduced vertical padding from 64px to 32px */
+    padding: 16px 32px;  /* Reduced vertical padding to 16px (50% of previous 32px) */
     text-align: center;
     cursor: pointer;
     transition: var(--transition);
@@ -766,7 +766,7 @@ body {
     }
 
     .drop-zone {
-        padding: 24px 24px;  /* Reduced for mobile */
+        padding: 12px 24px;  /* Reduced for mobile (50% of previous 24px) */
     }
 
     .drop-zone-title {
@@ -814,7 +814,7 @@ body {
     }
 
     .drop-zone {
-        padding: 20px 16px;  /* Further reduced for small mobile */
+        padding: 10px 16px;  /* Further reduced for small mobile (50% of previous 20px) */
     }
 
     .btn {
