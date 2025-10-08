@@ -159,8 +159,15 @@ check_env_file() {
 load_env() {
     if [ -f "${SCRIPT_DIR}/.env" ]; then
         # Export variables from .env (ignore comments and empty lines)
+        # Use eval to properly handle values with spaces
         set -a
-        source <(grep -v '^#' "${SCRIPT_DIR}/.env" | grep -v '^$' | sed 's/\r$//')
+        while IFS= read -r line; do
+            # Skip comments and empty lines
+            [[ "$line" =~ ^#.*$ ]] && continue
+            [[ -z "$line" ]] && continue
+            # Export the variable
+            eval "export $line"
+        done < "${SCRIPT_DIR}/.env"
         set +a
     fi
 }
