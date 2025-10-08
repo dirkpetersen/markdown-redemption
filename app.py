@@ -179,7 +179,19 @@ def extract_text_from_image(image_path):
         # Extract response
         result = response.json()
         markdown_text = result['choices'][0]['message']['content']
-        
+
+        # Remove markdown code fences if present
+        markdown_text = markdown_text.strip()
+
+        # Remove ```markdown and ``` wrapper if LLM added them
+        if markdown_text.startswith('```markdown'):
+            markdown_text = markdown_text[len('```markdown'):].lstrip('\n')
+        elif markdown_text.startswith('```'):
+            markdown_text = markdown_text[3:].lstrip('\n')
+
+        if markdown_text.endswith('```'):
+            markdown_text = markdown_text[:-3].rstrip('\n')
+
         return markdown_text.strip()
     
     except requests.exceptions.Timeout:
