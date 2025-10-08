@@ -407,6 +407,49 @@ body {
     min-width: 250px;
 }
 
+/* Processing Indicator */
+.processing-indicator {
+    text-align: center;
+    padding: 48px 32px;
+    background-color: var(--color-surface);
+    border: 2px solid var(--color-primary);
+    border-radius: var(--border-radius);
+    margin-bottom: 32px;
+}
+
+.processing-spinner {
+    margin: 0 auto 24px;
+    width: 48px;
+    height: 48px;
+}
+
+.processing-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-bottom: 12px;
+}
+
+.processing-subtitle {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+    margin-bottom: 24px;
+}
+
+.processing-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.processing-dots span {
+    width: 10px;
+    height: 10px;
+    background-color: var(--color-primary);
+    border-radius: 50%;
+    display: inline-block;
+}
+
 /* Info Cards */
 .info-cards {
     display: grid;

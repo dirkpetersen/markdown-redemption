@@ -184,13 +184,42 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         fileInput.files = dataTransfer.files;
 
-        // Disable submit button and show loading state
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span>Processing...</span><svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>';
+        // Hide file list and submit button
+        fileList.style.display = 'none';
+        submitBtn.style.display = 'none';
 
-        // Add spinner animation
+        // Show processing indicator
+        const processingIndicator = document.getElementById('processing-indicator');
+        if (processingIndicator) {
+            processingIndicator.style.display = 'block';
+        }
+
+        // Add animations
         const style = document.createElement('style');
-        style.textContent = '@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } .spinner { animation: spin 1s linear infinite; }';
+        style.textContent = `
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            @keyframes dots {
+                0%, 20% { opacity: 0; }
+                50% { opacity: 1; }
+                100% { opacity: 0; }
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .processing-spinner svg {
+                animation: spin 0.8s linear infinite;
+            }
+            .processing-indicator {
+                animation: fadeIn 0.3s ease-out;
+            }
+            .processing-dots span:nth-child(1) { animation: dots 1.4s infinite; animation-delay: 0s; }
+            .processing-dots span:nth-child(2) { animation: dots 1.4s infinite; animation-delay: 0.2s; }
+            .processing-dots span:nth-child(3) { animation: dots 1.4s infinite; animation-delay: 0.4s; }
+        `;
         document.head.appendChild(style);
     });
 
