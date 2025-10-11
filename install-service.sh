@@ -273,10 +273,24 @@ enable_service() {
     systemctl $USER_MODE enable "${SERVICE_NAME}"
     print_success "Service enabled"
 
-    # Ask user if they want to start now
-    read -p "Start the service now? (y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
+    # Ask user if they want to start now (with 10 second timeout)
+    print_info "Starting service in 10 seconds... (press 'n' to cancel)"
+    if read -t 10 -n 1 -r -p "Start the service now? (Y/n): "; then
+        echo
+        # User responded - check if they said no
+        if [[ $REPLY =~ ^[Nn]$ ]]; then
+            print_info "Service installed but not started. Start it with:"
+            echo "  systemctl $USER_MODE start ${SERVICE_NAME}"
+            return
+        fi
+    else
+        # Timeout reached - auto-start
+        echo
+        print_info "No response - auto-starting service..."
+    fi
+
+    # Start the service (either user said yes/enter or timeout)
+    if [[ ! $REPLY =~ ^[Nn]$ ]]; then
         systemctl $USER_MODE start "${SERVICE_NAME}"
         sleep 2
         
@@ -298,9 +312,6 @@ enable_service() {
                 echo "  journalctl --user -u ${SERVICE_NAME} -n 50"
             fi
         fi
-    else
-        print_info "Service installed but not started. Start it with:"
-        echo "  systemctl $USER_MODE start ${SERVICE_NAME}"
     fi
 }
 
