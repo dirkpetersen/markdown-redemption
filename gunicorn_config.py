@@ -8,7 +8,7 @@ workers = int(os.getenv('WORKERS', multiprocessing.cpu_count() * 2 + 1))
 
 # Timeout settings for long-running LLM requests
 # Workers will be gracefully restarted if requests take longer than this
-timeout = 600  # 10 minutes - generous for multi-page PDFs
+timeout = 900  # 15 minutes - generous for multi-page PDFs with slow APIs
 graceful_timeout = 30  # Give workers 30s to finish current request on shutdown
 keepalive = 5
 
