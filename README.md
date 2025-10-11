@@ -161,6 +161,7 @@ Example request format:
 ```
 markdown-redemption/
 ├── app.py                 # Main Flask application
+├── gunicorn_config.py     # Gunicorn configuration with timeout handling
 ├── requirements.txt       # Python dependencies
 ├── .env.default          # Configuration template
 ├── .env                  # Your configuration (gitignored)
