@@ -218,7 +218,7 @@ Group=${SERVICE_GROUP}
 WorkingDirectory=${SCRIPT_DIR}
 Environment="PATH=${SCRIPT_DIR}/venv/bin:/usr/local/bin:/usr/bin:/bin"
 EnvironmentFile=${SCRIPT_DIR}/.env
-ExecStart=${SCRIPT_DIR}/venv/bin/gunicorn -w ${WORKERS} -b ${HOST}:${PORT} app:app
+ExecStart=${SCRIPT_DIR}/venv/bin/gunicorn -w ${WORKERS} -b ${HOST}:${PORT} --timeout 300 app:app
 Restart=always
 RestartSec=10
 StandardOutput=journal
@@ -247,7 +247,7 @@ Type=simple
 WorkingDirectory=${SCRIPT_DIR}
 Environment="PATH=${SCRIPT_DIR}/venv/bin:/usr/local/bin:/usr/bin:/bin"
 EnvironmentFile=${SCRIPT_DIR}/.env
-ExecStart=${SCRIPT_DIR}/venv/bin/gunicorn -w ${WORKERS} -b ${HOST}:${PORT} app:app
+ExecStart=${SCRIPT_DIR}/venv/bin/gunicorn -w ${WORKERS} -b ${HOST}:${PORT} --timeout 300 app:app
 Restart=always
 RestartSec=10
 StandardOutput=journal
