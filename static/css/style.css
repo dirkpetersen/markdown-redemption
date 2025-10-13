@@ -419,8 +419,16 @@ body {
     margin-bottom: 48px;
 }
 
+.action-section-sidebar {
+    margin-top: 16px;
+}
+
+.action-section-sidebar .btn {
+    width: 100%;
+}
+
 #submit-btn {
-    min-width: 250px;
+    min-width: 200px;
 }
 
 /* Processing Indicator */
