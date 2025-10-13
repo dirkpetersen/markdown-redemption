@@ -405,9 +405,9 @@ def extract_text_from_docx(docx_path):
         )
         os.makedirs(media_folder, exist_ok=True)
 
-        # Run pandoc conversion
+        # Run pandoc conversion with GitHub-flavored markdown (supports tables)
         result = subprocess.run(
-            ['pandoc', '-t', 'markdown_strict', '--extract-media=' + media_folder, docx_path],
+            ['pandoc', '-t', 'gfm', '--extract-media=' + media_folder, docx_path],
             capture_output=True,
             text=True,
             timeout=60
