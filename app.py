@@ -356,9 +356,6 @@ def extract_text_from_pdf(pdf_path, mode='auto'):
             if VERBOSE_LOGGING:
                 print(f"Analysis failed, falling back to OCR: {str(e)}")
             return extract_text_from_pdf_ocr(pdf_path)
-    
-    except Exception as e:
-        raise Exception(f"Failed to process PDF: {str(e)}")
 
 def process_file(file_path, original_filename, conversion_mode='auto'):
     """Process a single file and return markdown text"""
