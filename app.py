@@ -195,9 +195,15 @@ def extract_text_from_image(image_path):
         return markdown_text.strip()
     
     except requests.exceptions.Timeout:
-        raise Exception("API request timed out")
+        raise Exception("LLM API request timed out. Please check your LLM_TIMEOUT setting.")
+    except requests.exceptions.ConnectionError as e:
+        raise Exception(
+            f"Cannot connect to LLM API at {LLM_ENDPOINT}. "
+            "Please ensure your vision API server is running and LLM_ENDPOINT is correct in .env file. "
+            f"Error: Connection refused"
+        )
     except requests.exceptions.RequestException as e:
-        raise Exception(f"API request failed: {str(e)}")
+        raise Exception(f"LLM API request failed: {str(e)}")
     except Exception as e:
         raise Exception(f"Failed to extract text: {str(e)}")
 
@@ -246,16 +252,32 @@ def analyze_page_complexity(page):
     return False, "simple text document"
 
 def extract_text_from_pdf_native(pdf_path):
-    """Extract text from PDF using PyMuPDF's native markdown extraction"""
+    """Extract text from PDF using PyMuPDF's native text extraction"""
     try:
         doc = fitz.open(pdf_path)
         markdown_pages = []
 
         for page_num in range(len(doc)):
             page = doc[page_num]
-            # Use PyMuPDF's built-in markdown extraction
-            page_markdown = page.get_text("markdown")
-            markdown_pages.append(page_markdown)
+
+            # Try markdown format first (requires newer PyMuPDF)
+            try:
+                page_text = page.get_text("markdown")
+            except (AssertionError, ValueError):
+                # Fallback to plain text for older PyMuPDF versions
+                page_text = page.get_text("text")
+                # Convert basic formatting to markdown
+                if page_text:
+                    # Simple conversion: preserve paragraphs
+                    lines = page_text.split('\n')
+                    formatted_lines = []
+                    for line in lines:
+                        line = line.strip()
+                        if line:
+                            formatted_lines.append(line)
+                    page_text = '\n\n'.join(formatted_lines)
+
+            markdown_pages.append(page_text)
 
         doc.close()
 
