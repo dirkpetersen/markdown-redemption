@@ -194,6 +194,14 @@ document.addEventListener('DOMContentLoaded', function() {
             processingIndicator.style.display = 'block';
         }
 
+        // Show current file being processed
+        const currentFileEl = document.getElementById('current-file');
+        const currentFilenameEl = document.getElementById('current-filename');
+        if (currentFileEl && currentFilenameEl && selectedFiles.length > 0) {
+            currentFileEl.style.display = 'block';
+            currentFilenameEl.textContent = selectedFiles[0].name;
+        }
+
         // Add animations
         const style = document.createElement('style');
         style.textContent = `

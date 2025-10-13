@@ -158,8 +158,24 @@ body {
 
 /* Upload Page */
 .upload-page {
-    max-width: 800px;
+    max-width: 1100px;
     margin: 0 auto;
+}
+
+/* Upload Grid Layout */
+.upload-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.upload-left {
+    min-width: 0;
+}
+
+.upload-right {
+    min-width: 0;
 }
 
 .hero-section {
@@ -184,11 +200,11 @@ body {
     background-color: var(--color-surface);
     border: 2px dashed var(--color-border);
     border-radius: var(--border-radius);
-    padding: 16px 32px;  /* Reduced vertical padding to 16px (50% of previous 32px) */
+    padding: 16px 24px;
     text-align: center;
     cursor: pointer;
     transition: var(--transition);
-    margin-bottom: 32px;
+    margin-bottom: 16px;
 }
 
 .drop-zone:hover {
@@ -241,8 +257,8 @@ body {
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius);
-    padding: 24px;
-    margin-bottom: 32px;
+    padding: 16px;
+    margin-bottom: 0;
 }
 
 .file-list-header {
@@ -433,7 +449,18 @@ body {
 .processing-subtitle {
     font-size: 1rem;
     color: var(--color-text-muted);
+    margin-bottom: 16px;
+}
+
+.processing-current-file {
+    font-size: 0.875rem;
+    color: var(--color-text);
     margin-bottom: 24px;
+    font-family: var(--font-mono);
+}
+
+.processing-current-file strong {
+    color: var(--color-secondary);
 }
 
 .processing-dots {
@@ -455,73 +482,72 @@ body {
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius);
-    padding: 24px;
-    margin-bottom: 32px;
+    padding: 16px;
+    height: fit-content;
 }
 
 .conversion-mode-section h4 {
-    font-size: 1rem;
+    font-size: 0.875rem;
     font-weight: 600;
     color: var(--color-secondary);
-    margin-bottom: 16px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.radio-group {
+.radio-group-horizontal {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
 }
 
-.radio-option {
+.radio-option-compact {
     display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 12px;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
     border: 2px solid var(--color-border);
     border-radius: var(--border-radius-sm);
     cursor: pointer;
     transition: var(--transition);
 }
 
-.radio-option:hover {
+.radio-option-compact:hover {
     border-color: var(--color-primary);
     background-color: #FFF5F0;
 }
 
-.radio-option input[type="radio"] {
-    margin-top: 4px;
-    width: 18px;
-    height: 18px;
+.radio-option-compact input[type="radio"] {
+    width: 16px;
+    height: 16px;
     cursor: pointer;
     accent-color: var(--color-primary);
+    flex-shrink: 0;
 }
 
-.radio-option input[type="radio"]:checked + .radio-label {
-    color: var(--color-primary);
-}
-
-.radio-option:has(input[type="radio"]:checked) {
+.radio-option-compact:has(input[type="radio"]:checked) {
     border-color: var(--color-primary);
     background-color: #FFF5F0;
+    border-width: 2px;
 }
 
-.radio-label {
+.radio-label-compact {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
     flex: 1;
 }
 
-.radio-label strong {
-    font-size: 0.9375rem;
+.radio-label-compact strong {
+    font-size: 0.875rem;
     font-weight: 600;
     color: var(--color-secondary);
 }
 
-.radio-label small {
-    font-size: 0.8125rem;
+.radio-label-compact small {
+    font-size: 0.75rem;
     color: var(--color-text-muted);
-    line-height: 1.4;
+    line-height: 1.3;
 }
 
 /* Info Cards */
@@ -839,12 +865,30 @@ body {
         font-size: 1rem;
     }
 
+    /* Stack upload grid on mobile */
+    .upload-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .conversion-mode-section {
+        margin-bottom: 16px;
+    }
+
     .drop-zone {
-        padding: 12px 24px;  /* Reduced for mobile (50% of previous 24px) */
+        padding: 12px 24px;
+        margin-bottom: 16px;
     }
 
     .drop-zone-title {
-        font-size: 1.25rem;
+        font-size: 1.125rem;
+    }
+
+    .drop-zone-subtitle {
+        font-size: 0.875rem;
+    }
+
+    .drop-zone-info {
+        font-size: 0.75rem;
     }
 
     .download-actions {

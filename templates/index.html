@@ -12,60 +12,65 @@
     </div>
 
     <form id="upload-form" action="{{ url_for('upload_files') }}" method="POST" enctype="multipart/form-data">
-        <div id="drop-zone" class="drop-zone">
-            <div class="drop-zone-content">
-                <div class="upload-icon">
-                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="17 8 12 3 7 8"></polyline>
-                        <line x1="12" y1="3" x2="12" y2="15"></line>
-                    </svg>
+        <div class="upload-grid">
+            <div class="upload-left">
+                <div id="drop-zone" class="drop-zone">
+                    <div class="drop-zone-content">
+                        <div class="upload-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                        </div>
+                        <h3 class="drop-zone-title">Drag & Drop Files Here</h3>
+                        <p class="drop-zone-subtitle">or click to browse</p>
+                        <p class="drop-zone-info">
+                            {{ allowed_extensions }} • Max {{ max_files }} files • {{ max_size_mb }}MB each
+                        </p>
+                    </div>
+                    <input type="file" id="file-input" name="files[]" multiple accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.pdf" style="display: none;">
                 </div>
-                <h3 class="drop-zone-title">Drag & Drop Files Here</h3>
-                <p class="drop-zone-subtitle">or click to browse your computer</p>
-                <p class="drop-zone-info">
-                    Supported formats: {{ allowed_extensions }}<br>
-                    Maximum {{ max_files }} files • {{ max_size_mb }}MB per file
-                </p>
-            </div>
-            <input type="file" id="file-input" name="files[]" multiple accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.pdf" style="display: none;">
-        </div>
 
-        <div id="file-list" class="file-list" style="display: none;">
-            <div class="file-list-header">
-                <h4>Selected Files (<span id="file-count">0</span>)</h4>
-                <button type="button" id="clear-all" class="btn-text">Clear All</button>
+                <div id="file-list" class="file-list" style="display: none;">
+                    <div class="file-list-header">
+                        <h4>Selected Files (<span id="file-count">0</span>)</h4>
+                        <button type="button" id="clear-all" class="btn-text">Clear All</button>
+                    </div>
+                    <div id="file-items" class="file-items"></div>
+                    <div class="file-list-footer">
+                        <span id="total-size">Total: 0 B</span>
+                    </div>
+                </div>
             </div>
-            <div id="file-items" class="file-items"></div>
-            <div class="file-list-footer">
-                <span id="total-size">Total: 0 B</span>
-            </div>
-        </div>
 
-        <div class="conversion-mode-section">
-            <h4>Conversion Method</h4>
-            <div class="radio-group">
-                <label class="radio-option">
-                    <input type="radio" name="conversion_mode" value="auto" checked>
-                    <span class="radio-label">
-                        <strong>Auto-detect</strong>
-                        <small>Automatically chooses best method (recommended)</small>
-                    </span>
-                </label>
-                <label class="radio-option">
-                    <input type="radio" name="conversion_mode" value="ocr">
-                    <span class="radio-label">
-                        <strong>AI/OCR Conversion</strong>
-                        <small>Uses vision AI for all pages (slower, best for images/tables)</small>
-                    </span>
-                </label>
-                <label class="radio-option">
-                    <input type="radio" name="conversion_mode" value="native">
-                    <span class="radio-label">
-                        <strong>PDF Text Extraction</strong>
-                        <small>Direct text extraction (faster, text-only PDFs)</small>
-                    </span>
-                </label>
+            <div class="upload-right">
+                <div class="conversion-mode-section">
+                    <h4>Conversion Method</h4>
+                    <div class="radio-group-horizontal">
+                        <label class="radio-option-compact">
+                            <input type="radio" name="conversion_mode" value="auto" checked>
+                            <span class="radio-label-compact">
+                                <strong>Auto</strong>
+                                <small>Best method</small>
+                            </span>
+                        </label>
+                        <label class="radio-option-compact">
+                            <input type="radio" name="conversion_mode" value="ocr">
+                            <span class="radio-label-compact">
+                                <strong>AI/OCR</strong>
+                                <small>Vision AI</small>
+                            </span>
+                        </label>
+                        <label class="radio-option-compact">
+                            <input type="radio" name="conversion_mode" value="native">
+                            <span class="radio-label-compact">
+                                <strong>Fast</strong>
+                                <small>Text only</small>
+                            </span>
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -87,6 +92,9 @@
             </div>
             <h3 class="processing-title">Redeeming Your Documents...</h3>
             <p class="processing-subtitle">AI is extracting text and converting to Markdown</p>
+            <p class="processing-current-file" id="current-file" style="display: none;">
+                <strong>Processing:</strong> <span id="current-filename"></span>
+            </p>
             <div class="processing-dots">
                 <span></span><span></span><span></span>
             </div>
