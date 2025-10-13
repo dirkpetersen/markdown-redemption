@@ -526,8 +526,9 @@ def process_documents():
                 'filename': original_name,
                 'error': error_msg
             })
-            # Always print errors to help debugging
+            # Print errors to console for debugging
             print(f"Processing error for {original_name}: {error_msg}")
+            # Only show full traceback in verbose mode
             if VERBOSE_LOGGING:
                 import traceback
                 traceback.print_exc()
@@ -540,7 +541,22 @@ def process_documents():
         pass
     
     if not results:
-        flash('All files failed to process', 'error')
+        # Show the actual error message instead of generic message
+        if errors:
+            # Get first error as it's usually the most relevant
+            first_error = errors[0]['error']
+            # Show concise error message
+            if 'Cannot connect to LLM API' in first_error:
+                flash('Cannot connect to LLM API. Please ensure your vision API server is running and LLM_ENDPOINT is configured in .env', 'error')
+            elif 'Connection refused' in first_error:
+                flash('Cannot connect to LLM API. Please check that your vision API server is running.', 'error')
+            elif 'timed out' in first_error.lower():
+                flash('LLM API request timed out. Try increasing LLM_TIMEOUT in .env or use a faster model.', 'error')
+            else:
+                # Show first 200 chars of error
+                flash(f'Processing failed: {first_error[:200]}', 'error')
+        else:
+            flash('All files failed to process', 'error')
         return redirect(url_for('index'))
     
     # Create output file(s)
