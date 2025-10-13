@@ -14,15 +14,20 @@ import requests
 import fitz  # PyMuPDF
 from PIL import Image
 
-# Load environment variables
-load_dotenv()
+# Load environment variables - try .env first, fallback to .env.default
+if os.path.exists('.env'):
+    load_dotenv('.env')
+elif os.path.exists('.env.default'):
+    load_dotenv('.env.default')
+else:
+    print("Warning: No .env or .env.default file found. Using hardcoded defaults.")
 
 # Initialize Flask app
 app = Flask(__name__)
 
 # Configuration
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'change-this-to-a-random-secret-key')
-app.config['MAX_CONTENT_LENGTH'] = int(os.getenv('MAX_UPLOAD_SIZE', 16777216))
+app.config['MAX_CONTENT_LENGTH'] = int(os.getenv('MAX_UPLOAD_SIZE', 104857600))  # Default: 100MB
 app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER', 'uploads')
 app.config['RESULT_FOLDER'] = os.getenv('RESULT_FOLDER', 'results')
 app.config['SESSION_TYPE'] = os.getenv('SESSION_TYPE', 'filesystem')
@@ -36,9 +41,9 @@ Session(app)
 # Application settings
 APP_NAME = os.getenv('APP_NAME', 'The Markdown Redemption')
 APP_TAGLINE = os.getenv('APP_TAGLINE', 'Every document deserves a second chance')
-THEME_COLOR = os.getenv('THEME_COLOR', '#4A90E2')
+THEME_COLOR = os.getenv('THEME_COLOR', '#D73F09')  # OSU Orange
 ALLOWED_EXTENSIONS = set(os.getenv('ALLOWED_EXTENSIONS', 'jpg,jpeg,png,gif,bmp,webp,pdf').split(','))
-MAX_CONCURRENT_UPLOADS = int(os.getenv('MAX_CONCURRENT_UPLOADS', 10))
+MAX_CONCURRENT_UPLOADS = int(os.getenv('MAX_CONCURRENT_UPLOADS', 100))  # Default: 100 files
 
 # LLM Configuration
 LLM_ENDPOINT = os.getenv('LLM_ENDPOINT', 'http://localhost:11434/v1')
