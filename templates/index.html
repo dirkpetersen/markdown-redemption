@@ -42,6 +42,33 @@
             </div>
         </div>
 
+        <div class="conversion-mode-section">
+            <h4>Conversion Method</h4>
+            <div class="radio-group">
+                <label class="radio-option">
+                    <input type="radio" name="conversion_mode" value="auto" checked>
+                    <span class="radio-label">
+                        <strong>Auto-detect</strong>
+                        <small>Automatically chooses best method (recommended)</small>
+                    </span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="conversion_mode" value="ocr">
+                    <span class="radio-label">
+                        <strong>AI/OCR Conversion</strong>
+                        <small>Uses vision AI for all pages (slower, best for images/tables)</small>
+                    </span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="conversion_mode" value="native">
+                    <span class="radio-label">
+                        <strong>PDF Text Extraction</strong>
+                        <small>Direct text extraction (faster, text-only PDFs)</small>
+                    </span>
+                </label>
+            </div>
+        </div>
+
         <div class="action-section">
             <button type="submit" id="submit-btn" class="btn btn-primary" disabled>
                 <span>Redeem Documents</span>

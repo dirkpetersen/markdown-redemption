@@ -201,7 +201,77 @@ def extract_text_from_image(image_path):
     except Exception as e:
         raise Exception(f"Failed to extract text: {str(e)}")
 
-def extract_text_from_pdf(pdf_path):
+def analyze_page_complexity(page):
+    """Analyze if a page needs AI/OCR or can use native extraction"""
+    page_rect = page.rect
+    page_area = page_rect.width * page_rect.height
+
+    # Check for tables
+    tables = page.find_tables()
+    if tables and len(tables.tables) > 0:
+        return True, "tables detected"
+
+    # Check for images
+    images = page.get_images()
+    meaningful_images = 0
+
+    for img in images:
+        try:
+            # Get image dimensions
+            xref = img[0]
+            bbox = page.get_image_bbox(img)
+            if bbox:
+                img_area = abs((bbox.x1 - bbox.x0) * (bbox.y1 - bbox.y0))
+                img_percent = (img_area / page_area) * 100
+
+                # Check if image is in header/footer zone (top/bottom 5%)
+                page_height = page_rect.height
+                in_header = bbox.y0 < (page_height * 0.05)
+                in_footer = bbox.y1 > (page_height * 0.95)
+
+                # Skip small images or header/footer images
+                if img_percent > 10 and not (in_header or in_footer):
+                    meaningful_images += 1
+        except:
+            pass
+
+    if meaningful_images > 0:
+        return True, f"{meaningful_images} meaningful image(s)"
+
+    # Try to extract text to check if it's readable
+    text = page.get_text()
+    if not text or len(text.strip()) < 50:
+        return True, "minimal text (possibly scanned)"
+
+    return False, "simple text document"
+
+def extract_text_from_pdf_native(pdf_path):
+    """Extract text from PDF using PyMuPDF's native markdown extraction"""
+    try:
+        doc = fitz.open(pdf_path)
+        markdown_pages = []
+
+        for page_num in range(len(doc)):
+            page = doc[page_num]
+            # Use PyMuPDF's built-in markdown extraction
+            page_markdown = page.get_text("markdown")
+            markdown_pages.append(page_markdown)
+
+        doc.close()
+
+        # Combine pages with separator
+        result = []
+        for i, page_content in enumerate(markdown_pages):
+            if i > 0:
+                result.append(f"\n\n---------- Page {i + 1} ----------\n\n")
+            result.append(page_content)
+
+        return ''.join(result)
+
+    except Exception as e:
+        raise Exception(f"Failed to extract text with PyMuPDF: {str(e)}")
+
+def extract_text_from_pdf_ocr(pdf_path):
     """Extract text from PDF by converting pages to images and processing with LLM"""
     try:
         doc = fitz.open(pdf_path)
@@ -240,16 +310,62 @@ def extract_text_from_pdf(pdf_path):
             result.append(page_content)
 
         return ''.join(result)
+
+    except Exception as e:
+        raise Exception(f"Failed to process PDF with OCR: {str(e)}")
+
+def extract_text_from_pdf(pdf_path, mode='auto'):
+    """
+    Extract text from PDF with smart mode selection
+
+    mode: 'auto' (detect best method), 'ocr' (force AI/OCR), 'native' (force PyMuPDF)
+    """
+    if mode == 'ocr':
+        return extract_text_from_pdf_ocr(pdf_path)
+    elif mode == 'native':
+        return extract_text_from_pdf_native(pdf_path)
+    else:  # auto mode
+        try:
+            doc = fitz.open(pdf_path)
+
+            # Analyze first few pages to determine method
+            use_ocr = False
+            reasons = []
+            pages_to_check = min(3, len(doc))  # Check first 3 pages
+
+            for page_num in range(pages_to_check):
+                page = doc[page_num]
+                needs_ocr, reason = analyze_page_complexity(page)
+                if needs_ocr:
+                    use_ocr = True
+                    reasons.append(f"Page {page_num + 1}: {reason}")
+
+            doc.close()
+
+            if use_ocr:
+                if VERBOSE_LOGGING:
+                    print(f"Using OCR mode for {pdf_path}: {', '.join(reasons)}")
+                return extract_text_from_pdf_ocr(pdf_path)
+            else:
+                if VERBOSE_LOGGING:
+                    print(f"Using native extraction for {pdf_path}: simple text document")
+                return extract_text_from_pdf_native(pdf_path)
+
+        except Exception as e:
+            # Fallback to OCR if analysis fails
+            if VERBOSE_LOGGING:
+                print(f"Analysis failed, falling back to OCR: {str(e)}")
+            return extract_text_from_pdf_ocr(pdf_path)
     
     except Exception as e:
         raise Exception(f"Failed to process PDF: {str(e)}")
 
-def process_file(file_path, original_filename):
+def process_file(file_path, original_filename, conversion_mode='auto'):
     """Process a single file and return markdown text"""
     ext = os.path.splitext(original_filename)[1].lower().lstrip('.')
-    
+
     if ext == 'pdf':
-        return extract_text_from_pdf(file_path)
+        return extract_text_from_pdf(file_path, mode=conversion_mode)
     else:
         return extract_text_from_image(file_path)
 
@@ -288,7 +404,12 @@ def upload_files():
         if len(files) > MAX_CONCURRENT_UPLOADS:
             flash(f'Maximum {MAX_CONCURRENT_UPLOADS} files allowed per upload', 'error')
             return redirect(url_for('index'))
-        
+
+        # Get conversion mode from form
+        conversion_mode = request.form.get('conversion_mode', 'auto')
+        if conversion_mode not in ['auto', 'ocr', 'native']:
+            conversion_mode = 'auto'
+
         # Generate session ID
         session_id = str(uuid.uuid4())
         session_dir = os.path.join(app.config['UPLOAD_FOLDER'], session_id)
@@ -330,6 +451,7 @@ def upload_files():
         # Store session data
         session['session_id'] = session_id
         session['files'] = saved_files
+        session['conversion_mode'] = conversion_mode
         session['upload_timestamp'] = datetime.now().isoformat()
         
         return redirect(url_for('process_documents'))
@@ -350,20 +472,21 @@ def process_documents():
     
     session_id = session['session_id']
     files = session['files']
+    conversion_mode = session.get('conversion_mode', 'auto')
     session_dir = os.path.join(app.config['UPLOAD_FOLDER'], session_id)
     result_dir = os.path.join(app.config['RESULT_FOLDER'], session_id)
     os.makedirs(result_dir, exist_ok=True)
-    
+
     results = []
     errors = []
-    
+
     # Process each file
     for file_info in files:
         file_path = os.path.join(session_dir, file_info['saved_name'])
         original_name = file_info['original_name']
-        
+
         try:
-            markdown_text = process_file(file_path, original_name)
+            markdown_text = process_file(file_path, original_name, conversion_mode)
             
             # Save markdown file
             md_filename = os.path.splitext(original_name)[0] + '.md'
