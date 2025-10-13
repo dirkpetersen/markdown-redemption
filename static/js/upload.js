@@ -14,8 +14,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const uploadForm = document.getElementById('upload-form');
 
     let selectedFiles = [];
-    const maxFiles = parseInt(dropZone.dataset.maxFiles) || 10;
-    const maxSizeMB = parseInt(dropZone.dataset.maxSizeMB) || 16;
+    const maxFiles = parseInt(dropZone.dataset.maxFiles) || 100;
+    const maxSizeMB = parseInt(dropZone.dataset.maxSizeMb) || 100;
     const maxSizeBytes = maxSizeMB * 1024 * 1024;
     const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'pdf'];
 
