@@ -504,8 +504,11 @@ def process_documents():
                 'filename': original_name,
                 'error': error_msg
             })
+            # Always print errors to help debugging
+            print(f"Processing error for {original_name}: {error_msg}")
             if VERBOSE_LOGGING:
-                print(f"Processing error for {original_name}: {error_msg}")
+                import traceback
+                traceback.print_exc()
     
     # Clean up upload directory
     try:
