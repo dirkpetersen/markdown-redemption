@@ -14,7 +14,7 @@
     <form id="upload-form" action="{{ url_for('upload_files') }}" method="POST" enctype="multipart/form-data">
         <div class="upload-grid">
             <div class="upload-left">
-                <div id="drop-zone" class="drop-zone">
+                <div id="drop-zone" class="drop-zone" data-max-files="{{ max_files }}" data-max-size-mb="{{ max_size_mb }}">
                     <div class="drop-zone-content">
                         <div class="upload-icon">
                             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
