@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const maxFiles = parseInt(dropZone.dataset.maxFiles) || 100;
     const maxSizeMB = parseInt(dropZone.dataset.maxSizeMb) || 100;
     const maxSizeBytes = maxSizeMB * 1024 * 1024;
-    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'pdf'];
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'pdf', 'docx'];
 
     // Click to browse
     dropZone.addEventListener('click', () => {
@@ -130,12 +130,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const ext = file.name.split('.').pop().toLowerCase();
         const isPDF = ext === 'pdf';
+        const isDOCX = ext === 'docx';
 
-        const pdfIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><text x="12" y="17" text-anchor="middle" font-size="6" fill="currentColor">PDF</text></svg>';
+        const pdfIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>';
+        const docxIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line></svg>';
         const imageIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>';
 
-        item.innerHTML = '<div class="file-info"><div class="file-icon">' + 
-            (isPDF ? pdfIcon : imageIcon) + 
+        const fileIcon = isDOCX ? docxIcon : (isPDF ? pdfIcon : imageIcon);
+
+        item.innerHTML = '<div class="file-info"><div class="file-icon">' +
+            fileIcon + 
             '</div><span class="file-name">' + escapeHtml(file.name) + '</span></div>' +
             '<span class="file-size">' + formatFileSize(file.size) + '</span>' +
             '<button type="button" class="remove-file" data-index="' + index + '" title="Remove file">✕</button>';

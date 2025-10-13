@@ -42,7 +42,7 @@ Session(app)
 APP_NAME = os.getenv('APP_NAME', 'The Markdown Redemption')
 APP_TAGLINE = os.getenv('APP_TAGLINE', 'Every document deserves a second chance')
 THEME_COLOR = os.getenv('THEME_COLOR', '#D73F09')  # OSU Orange
-ALLOWED_EXTENSIONS = set(os.getenv('ALLOWED_EXTENSIONS', 'jpg,jpeg,png,gif,bmp,webp,pdf').split(','))
+ALLOWED_EXTENSIONS = set(os.getenv('ALLOWED_EXTENSIONS', 'jpg,jpeg,png,gif,bmp,webp,pdf,docx').split(','))
 MAX_CONCURRENT_UPLOADS = int(os.getenv('MAX_CONCURRENT_UPLOADS', 100))  # Default: 100 files
 
 # LLM Configuration
@@ -384,12 +384,62 @@ def extract_text_from_pdf(pdf_path, mode='auto'):
                 print(f"Analysis failed, falling back to OCR: {str(e)}")
             return extract_text_from_pdf_ocr(pdf_path)
 
+def extract_text_from_docx(docx_path):
+    """Extract text from DOCX using pandoc"""
+    try:
+        import subprocess
+
+        # Check if pandoc is installed
+        try:
+            subprocess.run(['pandoc', '--version'], capture_output=True, check=True)
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            raise Exception(
+                "Pandoc is not installed. Install with: sudo apt install pandoc (Linux) "
+                "or brew install pandoc (Mac) or download from https://pandoc.org/installing.html"
+            )
+
+        # Create media folder for extracted images
+        media_folder = os.path.join(
+            os.path.dirname(docx_path),
+            f'media_{uuid.uuid4()}'
+        )
+        os.makedirs(media_folder, exist_ok=True)
+
+        # Run pandoc conversion
+        result = subprocess.run(
+            ['pandoc', '-t', 'markdown_strict', '--extract-media=' + media_folder, docx_path],
+            capture_output=True,
+            text=True,
+            timeout=60
+        )
+
+        if result.returncode != 0:
+            raise Exception(f"Pandoc conversion failed: {result.stderr}")
+
+        markdown_text = result.stdout
+
+        # Clean up media folder if empty
+        try:
+            if os.path.exists(media_folder) and not os.listdir(media_folder):
+                os.rmdir(media_folder)
+        except:
+            pass
+
+        return markdown_text.strip()
+
+    except subprocess.TimeoutExpired:
+        raise Exception("Pandoc conversion timed out")
+    except Exception as e:
+        raise Exception(f"Failed to convert DOCX: {str(e)}")
+
 def process_file(file_path, original_filename, conversion_mode='auto'):
     """Process a single file and return markdown text"""
     ext = os.path.splitext(original_filename)[1].lower().lstrip('.')
 
     if ext == 'pdf':
         return extract_text_from_pdf(file_path, mode=conversion_mode)
+    elif ext == 'docx':
+        return extract_text_from_docx(file_path)
     else:
         return extract_text_from_image(file_path)
 
