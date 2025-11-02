@@ -1,8 +1,9 @@
 flask>=3.1.2
 python-dotenv==1.1.1
-pymupdf4llm>=0.0.27
-pymupdf>=1.26.5
+pymupdf4llm>=0.0.17
+pymupdf>=1.24.0,<1.27.0
 Pillow==10.3.0
 requests==2.32.3
 gunicorn==22.0.0
 Flask-Session==0.8.0
+mangum>=0.18.0

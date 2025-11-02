@@ -1,0 +1,36 @@
+# Dockerfile for building AWS Lambda deployment package
+# This ensures binary dependencies (PyMuPDF, Pillow) are compiled for Lambda runtime
+
+# Use official AWS Lambda Python 3.12 runtime image
+FROM public.ecr.aws/lambda/python:3.12
+
+# Install system dependencies required for building Python packages
+RUN yum install -y \
+    gcc \
+    gcc-c++ \
+    make \
+    zlib-devel \
+    libjpeg-turbo-devel \
+    freetype-devel \
+    && yum clean all
+
+# Copy requirements file
+COPY requirements.txt ${LAMBDA_TASK_ROOT}/
+
+# Install Python dependencies to the Lambda task root
+# This ensures all packages are in the correct location for Lambda
+RUN pip install --no-cache-dir -r ${LAMBDA_TASK_ROOT}/requirements.txt -t ${LAMBDA_TASK_ROOT}/
+
+# Copy application code
+COPY app.py ${LAMBDA_TASK_ROOT}/
+COPY lambda_handler.py ${LAMBDA_TASK_ROOT}/
+
+# Copy templates and static files
+COPY templates/ ${LAMBDA_TASK_ROOT}/templates/
+COPY static/ ${LAMBDA_TASK_ROOT}/static/
+
+# Copy .env.default for reference (actual .env will be set via Lambda environment variables)
+COPY .env.default ${LAMBDA_TASK_ROOT}/ 2>/dev/null || true
+
+# Set the Lambda handler
+CMD ["lambda_handler.lambda_handler"]

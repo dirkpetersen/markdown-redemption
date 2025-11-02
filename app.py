@@ -28,10 +28,19 @@ app = Flask(__name__)
 # Configuration
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'change-this-to-a-random-secret-key')
 app.config['MAX_CONTENT_LENGTH'] = int(os.getenv('MAX_UPLOAD_SIZE', 104857600))  # Default: 100MB
-app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER', 'uploads')
-app.config['RESULT_FOLDER'] = os.getenv('RESULT_FOLDER', 'results')
-app.config['SESSION_TYPE'] = os.getenv('SESSION_TYPE', 'filesystem')
-app.config['SESSION_FILE_DIR'] = os.getenv('SESSION_FILE_DIR', 'flask_session')
+
+# Lambda-compatible storage paths (use /tmp in Lambda environment)
+is_lambda = os.getenv('AWS_LAMBDA_FUNCTION_NAME') is not None
+default_upload_folder = '/tmp/uploads' if is_lambda else 'uploads'
+default_result_folder = '/tmp/results' if is_lambda else 'results'
+default_session_folder = '/tmp/flask_session' if is_lambda else 'flask_session'
+
+app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER', default_upload_folder)
+app.config['RESULT_FOLDER'] = os.getenv('RESULT_FOLDER', default_result_folder)
+
+# Session configuration - use cookie-based sessions for Lambda compatibility
+app.config['SESSION_TYPE'] = os.getenv('SESSION_TYPE', 'null')  # 'null' means cookie-based
+app.config['SESSION_FILE_DIR'] = os.getenv('SESSION_FILE_DIR', default_session_folder)
 app.config['SESSION_PERMANENT'] = os.getenv('SESSION_PERMANENT', 'False').lower() == 'true'
 app.config['PERMANENT_SESSION_LIFETIME'] = int(os.getenv('PERMANENT_SESSION_LIFETIME', 86400))
 
@@ -67,7 +76,9 @@ VERBOSE_LOGGING = os.getenv('VERBOSE_LOGGING', 'False').lower() == 'true'
 # Ensure directories exist
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['RESULT_FOLDER'], exist_ok=True)
-os.makedirs(app.config['SESSION_FILE_DIR'], exist_ok=True)
+# Only create session directory if using filesystem sessions
+if app.config['SESSION_TYPE'] == 'filesystem':
+    os.makedirs(app.config['SESSION_FILE_DIR'], exist_ok=True)
 
 # Normalize LLM endpoint to ensure /v1 path
 def normalize_endpoint(endpoint):
