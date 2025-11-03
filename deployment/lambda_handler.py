@@ -32,14 +32,11 @@ class WSGIEventAdapter:
             method = http_info.get('method', 'GET')
             path = http_info.get('path', '/')
             source_ip = http_info.get('sourceIp', '127.0.0.1')
-            stage = ''
         else:
             # REST API format
             method = self.event.get('httpMethod', 'GET')
             path = self.event.get('path', '/')
             source_ip = self.event.get('requestContext', {}).get('identity', {}).get('sourceIp', '127.0.0.1')
-            # Get stage from requestContext
-            stage = self.event.get('requestContext', {}).get('stage', '')
 
         # Parse query string
         query_string = self.event.get('rawQueryString', '') or \
@@ -56,27 +53,13 @@ class WSGIEventAdapter:
             body = body.encode('utf-8') if isinstance(body, str) else body
 
         # Build environ
-        # For REST API direct access, include stage in SCRIPT_NAME
-        # For custom domain, DON'T include stage (base path mapping handles it)
-        # Detect custom domain by checking if Host header is custom domain
-        host = headers.get('host', '')
-        is_custom_domain = not host.endswith('.amazonaws.com')
-
-        if is_custom_domain:
-            # Custom domain - don't use stage in SCRIPT_NAME
-            script_name = ''
-        else:
-            # Direct API Gateway - use stage in SCRIPT_NAME
-            script_name = f'/{stage}' if stage and stage != '$default' else ''
-
+        # Hardcoded for custom domain: https://markdown.osu.internetchen.de/
+        # SCRIPT_NAME is always empty since custom domain base path mapping is at root
+        script_name = ''
         path_info = unquote(path)
 
         # Debug logging
-        print(f"[WSGI] Host: {host}")
-        print(f"[WSGI] Is custom domain: {is_custom_domain}")
-        print(f"[WSGI] Stage: {stage}")
         print(f"[WSGI] Original path: {path}")
-        print(f"[WSGI] SCRIPT_NAME: {script_name}")
         print(f"[WSGI] PATH_INFO: {path_info}")
 
         environ = {
