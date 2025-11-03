@@ -21,15 +21,42 @@ elif os.path.exists('.env.default'):
 else:
     print("Warning: No .env or .env.default file found. Using hardcoded defaults.")
 
-# Initialize Flask app
-app = Flask(__name__)
+# Determine if running in Lambda environment FIRST
+is_lambda = os.getenv('AWS_LAMBDA_FUNCTION_NAME') is not None
+
+# Initialize Flask app with explicit static/template folder paths
+# This is critical for Lambda where the working directory structure differs
+app_dir = os.path.dirname(os.path.abspath(__file__))
+static_folder = os.path.join(app_dir, 'static')
+template_folder = os.path.join(app_dir, 'templates')
+
+# If running in Lambda, static/templates might be in site-packages
+if not os.path.exists(static_folder):
+    import site
+    for site_package in site.getsitepackages():
+        alt_static = os.path.join(site_package, 'static')
+        alt_template = os.path.join(site_package, 'templates')
+        if os.path.exists(alt_static):
+            static_folder = alt_static
+            template_folder = alt_template
+            break
+
+app = Flask(__name__, static_folder=static_folder, template_folder=template_folder)
+
+# Debug logging for Lambda environment
+if is_lambda or os.getenv('DEBUG_PATHS'):
+    print(f"[DEBUG] Flask App Dir: {app_dir}")
+    print(f"[DEBUG] Static Folder: {app.static_folder}")
+    print(f"[DEBUG] Template Folder: {app.template_folder}")
+    print(f"[DEBUG] Static URL Path: {app.static_url_path}")
+    if os.path.exists(app.static_folder):
+        print(f"[DEBUG] Static folder exists: {os.listdir(app.static_folder)[:5]}...")
 
 # Configuration
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'change-this-to-a-random-secret-key')
 app.config['MAX_CONTENT_LENGTH'] = int(os.getenv('MAX_UPLOAD_SIZE', 104857600))  # Default: 100MB
 
 # Lambda-compatible storage paths (use /tmp in Lambda environment)
-is_lambda = os.getenv('AWS_LAMBDA_FUNCTION_NAME') is not None
 default_upload_folder = '/tmp/uploads' if is_lambda else 'uploads'
 default_result_folder = '/tmp/results' if is_lambda else 'results'
 default_session_folder = '/tmp/flask_session' if is_lambda else 'flask_session'
