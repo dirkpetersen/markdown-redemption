@@ -12,7 +12,6 @@ from flask_session import Session
 from dotenv import load_dotenv
 import requests
 import fitz  # PyMuPDF
-from PIL import Image
 
 # Load environment variables - try .env first, fallback to .env.default
 if os.path.exists('.env'):
@@ -39,13 +38,20 @@ app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER', default_upload_folder)
 app.config['RESULT_FOLDER'] = os.getenv('RESULT_FOLDER', default_result_folder)
 
 # Session configuration - use cookie-based sessions for Lambda compatibility
-app.config['SESSION_TYPE'] = os.getenv('SESSION_TYPE', 'null')  # 'null' means cookie-based
-app.config['SESSION_FILE_DIR'] = os.getenv('SESSION_FILE_DIR', default_session_folder)
+# For Lambda, we don't initialize Flask-Session at all since we use signed cookies via Flask directly
+# This avoids the SESSION_TYPE configuration issues
+# Session data will be stored in secure cookies instead
+
+# Only initialize Flask-Session if explicitly configured
 app.config['SESSION_PERMANENT'] = os.getenv('SESSION_PERMANENT', 'False').lower() == 'true'
 app.config['PERMANENT_SESSION_LIFETIME'] = int(os.getenv('PERMANENT_SESSION_LIFETIME', 86400))
 
-# Initialize session
-Session(app)
+session_type = os.getenv('SESSION_TYPE', '').lower()
+if session_type and session_type != 'null':
+    # Only initialize if a valid session type is specified
+    app.config['SESSION_TYPE'] = session_type
+    app.config['SESSION_FILE_DIR'] = os.getenv('SESSION_FILE_DIR', default_session_folder)
+    Session(app)
 
 # Application settings
 APP_NAME = os.getenv('APP_NAME', 'The Markdown Redemption')
@@ -77,7 +83,7 @@ VERBOSE_LOGGING = os.getenv('VERBOSE_LOGGING', 'False').lower() == 'true'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['RESULT_FOLDER'], exist_ok=True)
 # Only create session directory if using filesystem sessions
-if app.config['SESSION_TYPE'] == 'filesystem':
+if app.config.get('SESSION_TYPE') == 'filesystem':
     os.makedirs(app.config['SESSION_FILE_DIR'], exist_ok=True)
 
 # Normalize LLM endpoint to ensure /v1 path
