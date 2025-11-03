@@ -56,12 +56,24 @@ class WSGIEventAdapter:
             body = body.encode('utf-8') if isinstance(body, str) else body
 
         # Build environ
-        # For REST API, stage is in requestContext and already stripped from path
-        # Set SCRIPT_NAME to /stage so Flask generates correct URLs
-        script_name = f'/{stage}' if stage and stage != '$default' else ''
+        # For REST API direct access, include stage in SCRIPT_NAME
+        # For custom domain, DON'T include stage (base path mapping handles it)
+        # Detect custom domain by checking if Host header is custom domain
+        host = headers.get('host', '')
+        is_custom_domain = not host.endswith('.amazonaws.com')
+
+        if is_custom_domain:
+            # Custom domain - don't use stage in SCRIPT_NAME
+            script_name = ''
+        else:
+            # Direct API Gateway - use stage in SCRIPT_NAME
+            script_name = f'/{stage}' if stage and stage != '$default' else ''
+
         path_info = unquote(path)
 
         # Debug logging
+        print(f"[WSGI] Host: {host}")
+        print(f"[WSGI] Is custom domain: {is_custom_domain}")
         print(f"[WSGI] Stage: {stage}")
         print(f"[WSGI] Original path: {path}")
         print(f"[WSGI] SCRIPT_NAME: {script_name}")
