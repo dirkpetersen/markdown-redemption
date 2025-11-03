@@ -8,7 +8,7 @@
 ## Issue 1: Direct API Gateway Endpoint CSS Not Loading
 
 ### Status
-⚠️ **Known Limitation - Accepted**
+⚠️ **By Design - Hardcoded for Custom Domain Only**
 
 ### Affected Endpoint
 ```
@@ -23,53 +23,38 @@ https://43bmng09mi.execute-api.us-west-2.amazonaws.com/prod/
 - Website appears unstyled (plain text)
 
 ### Root Cause
-The Lambda handler detects custom domain by checking if Host header ends with `.amazonaws.com`. However:
-- API Gateway doesn't always pass Host header to Lambda
-- Empty Host header is treated as custom domain
-- SCRIPT_NAME set to `''` instead of `/prod`
-- Flask generates URLs without `/prod/` prefix
+**Intentional design decision**: Code was simplified and hardcoded to only support the custom domain.
 
-### Why Not Fixed
-- Custom domain (https://markdown.osu.internetchen.de/) works perfectly ✅
-- Custom domain is the primary user-facing URL
-- Direct API Gateway endpoint is for testing/fallback only
-- User confirmed this is acceptable
+The Lambda handler now always sets `SCRIPT_NAME = ''` (empty), which generates URLs without any prefix:
+- Custom domain: `https://markdown.osu.internetchen.de/static/css/style.css` ✅ Works
+- Direct API: `https://43bmng09mi.../prod/static/css/style.css` needed, but generates `/static/...` ❌ Broken
 
-### Workaround
-Use the custom domain for all user-facing access:
-```
-https://markdown.osu.internetchen.de/
-```
+### Why This Approach
+- **Simplicity**: Removed 20+ lines of complex detection logic
+- **Reliability**: No edge cases with missing/empty Host headers
+- **User Request**: User asked to "hardcode that it works with https://markdown.osu.internetchen.de/"
+- **Primary URL**: Custom domain is the only user-facing endpoint
+- **User Confirmed**: "which is ok for me" regarding direct API Gateway
 
-### Technical Details
+### Current Implementation
 ```python
-# Current logic in lambda_handler.py:
-host = headers.get('host', '')  # Sometimes empty
-is_custom_domain = not host.endswith('.amazonaws.com')  # True when empty!
+# lambda_handler.py - simplified
+script_name = ''  # Hardcoded for custom domain
+path_info = unquote(path)
 
-if is_custom_domain:
-    script_name = ''  # Wrong for direct API Gateway with empty host
-else:
-    script_name = f'/{stage}'
+environ = {
+    'SCRIPT_NAME': script_name,
+    'PATH_INFO': path_info,
+    ...
+}
 ```
 
-### Potential Fix (If Needed)
-If direct API Gateway endpoint must work, could change detection logic:
-
-```python
-# More explicit detection
-host = headers.get('host', '')
-is_direct_api = 'execute-api.us-west-2.amazonaws.com' in host
-is_custom_domain = host and not is_direct_api
-
-if is_custom_domain:
-    script_name = ''
-else:
-    # Direct API Gateway or empty host - use stage
-    script_name = f'/{stage}' if stage else ''
+### Use Custom Domain Only
+```
+✅ https://markdown.osu.internetchen.de/
 ```
 
-But this is unnecessary since custom domain is working.
+This is the only supported endpoint. Direct API Gateway is not intended for use.
 
 ---
 
