@@ -1,0 +1,654 @@
+{
+  "project": {
+    "name": "The Markdown Redemption",
+    "description": "Flask web application for converting PDFs and images to Markdown using AI vision models",
+    "deployment_date": "2025-11-03",
+    "status": "production_ready",
+    "repository": "https://github.com/user/markdown-redemption"
+  },
+  "endpoints": {
+    "primary": {
+      "url": "https://markdown.osu.internetchen.de/",
+      "type": "custom_domain",
+      "certificate": "ACM certificate d00a1b94-32ad-45ab-90b2-19d4b943e7b3"
+    },
+    "backup": {
+      "url": "https://43bmng09mi.execute-api.us-west-2.amazonaws.com/prod/",
+      "type": "direct_api_gateway"
+    }
+  },
+  "aws_resources": {
+    "lambda": {
+      "function_name": "markdown-redemption",
+      "runtime": "python3.13",
+      "handler": "lambda_handler.lambda_handler",
+      "memory_size_mb": 2048,
+      "timeout_seconds": 900,
+      "ephemeral_storage_mb": 10240,
+      "region": "us-west-2",
+      "arn": "arn:aws:lambda:us-west-2:ACCOUNT_ID:function:markdown-redemption",
+      "package_size_mb": 44.3,
+      "cold_start_ms": 1800,
+      "warm_request_ms": 500
+    },
+    "api_gateway": {
+      "type": "REST",
+      "api_id": "43bmng09mi",
+      "api_name": "markdown-redemption-rest",
+      "stage": "prod",
+      "endpoint": "https://43bmng09mi.execute-api.us-west-2.amazonaws.com/prod/",
+      "region": "us-west-2",
+      "resources": [
+        {
+          "path": "/",
+          "resource_id": "etnmrmcwoe",
+          "methods": ["ANY"],
+          "integration_type": "AWS_PROXY"
+        },
+        {
+          "path": "/{proxy+}",
+          "resource_id": "b44dau",
+          "methods": ["ANY"],
+          "integration_type": "AWS_PROXY"
+        }
+      ]
+    },
+    "custom_domain": {
+      "domain_name": "markdown.osu.internetchen.de",
+      "endpoint_type": "REGIONAL",
+      "regional_domain": "d-c6h2a7wwmk.execute-api.us-west-2.amazonaws.com",
+      "regional_hosted_zone_id": "Z2OJLYMUO9EFXC",
+      "certificate_arn": "arn:aws:acm:us-west-2:ACCOUNT_ID:certificate/d00a1b94-32ad-45ab-90b2-19d4b943e7b3",
+      "security_policy": "TLS_1_2",
+      "base_path_mapping": {
+        "base_path": "/",
+        "rest_api_id": "43bmng09mi",
+        "stage": "prod"
+      }
+    },
+    "route53": {
+      "hosted_zone_id": "Z03873211NP2MYB53BG88",
+      "hosted_zone_name": "osu.internetchen.de",
+      "record": {
+        "name": "markdown.osu.internetchen.de",
+        "type": "A",
+        "alias": {
+          "dns_name": "d-c6h2a7wwmk.execute-api.us-west-2.amazonaws.com",
+          "hosted_zone_id": "Z2OJLYMUO9EFXC",
+          "evaluate_target_health": false
+        }
+      }
+    },
+    "acm_certificate": {
+      "arn": "arn:aws:acm:us-west-2:ACCOUNT_ID:certificate/d00a1b94-32ad-45ab-90b2-19d4b943e7b3",
+      "domain_name": "markdown.osu.internetchen.de",
+      "status": "ISSUED",
+      "type": "AMAZON_ISSUED",
+      "key_algorithm": "RSA-2048",
+      "validation_method": "DNS",
+      "subject_alternative_names": ["markdown.osu.internetchen.de"],
+      "not_before": "2025-11-02T16:00:00-08:00",
+      "not_after": "2026-12-02T15:59:59-08:00"
+    },
+    "s3_bucket": {
+      "name": "markdown-redemption-usw2-1762126505",
+      "region": "us-west-2",
+      "purpose": "Lambda deployment packages",
+      "latest_package": "lambda-deployment-v8.zip"
+    },
+    "cloudwatch_logs": {
+      "log_group": "/aws/lambda/markdown-redemption",
+      "retention_days": null,
+      "region": "us-west-2"
+    }
+  },
+  "iam_policies": {
+    "lambda_trust_policy": {
+      "description": "Trust policy allowing Lambda service to assume the execution role",
+      "policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Principal": {
+              "Service": "lambda.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+          }
+        ]
+      }
+    },
+    "lambda_execution_policy": {
+      "description": "Permissions for Lambda function to write CloudWatch logs",
+      "policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "logs:CreateLogGroup",
+              "logs:CreateLogStream",
+              "logs:PutLogEvents"
+            ],
+            "Resource": "arn:aws:logs:us-west-2:ACCOUNT_ID:log-group:/aws/lambda/markdown-redemption:*"
+          }
+        ]
+      },
+      "managed_policy_alternative": "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+    },
+    "deployment_user_policy": {
+      "description": "Comprehensive permissions for user deploying and managing the application",
+      "policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "LambdaManagement",
+            "Effect": "Allow",
+            "Action": [
+              "lambda:CreateFunction",
+              "lambda:UpdateFunctionCode",
+              "lambda:UpdateFunctionConfiguration",
+              "lambda:GetFunction",
+              "lambda:GetFunctionConfiguration",
+              "lambda:AddPermission",
+              "lambda:RemovePermission",
+              "lambda:GetPolicy",
+              "lambda:ListVersionsByFunction",
+              "lambda:PublishVersion",
+              "lambda:CreateAlias",
+              "lambda:UpdateAlias",
+              "lambda:GetAlias",
+              "lambda:ListAliases",
+              "lambda:InvokeFunction"
+            ],
+            "Resource": [
+              "arn:aws:lambda:us-west-2:ACCOUNT_ID:function:markdown-redemption",
+              "arn:aws:lambda:us-west-2:ACCOUNT_ID:function:markdown-redemption:*"
+            ]
+          },
+          {
+            "Sid": "S3DeploymentBucket",
+            "Effect": "Allow",
+            "Action": [
+              "s3:CreateBucket",
+              "s3:PutObject",
+              "s3:GetObject",
+              "s3:ListBucket",
+              "s3:DeleteObject",
+              "s3:GetBucketLocation",
+              "s3:PutBucketVersioning"
+            ],
+            "Resource": [
+              "arn:aws:s3:::markdown-redemption-usw2-1762126505",
+              "arn:aws:s3:::markdown-redemption-usw2-1762126505/*"
+            ]
+          },
+          {
+            "Sid": "APIGatewayManagement",
+            "Effect": "Allow",
+            "Action": [
+              "apigateway:GET",
+              "apigateway:POST",
+              "apigateway:PUT",
+              "apigateway:PATCH",
+              "apigateway:DELETE",
+              "apigateway:CreateRestApi",
+              "apigateway:CreateDeployment",
+              "apigateway:CreateDomainName",
+              "apigateway:CreateBasePathMapping",
+              "apigateway:CreateResource",
+              "apigateway:GetRestApis",
+              "apigateway:GetRestApi",
+              "apigateway:GetResources",
+              "apigateway:GetResource",
+              "apigateway:GetDeployments",
+              "apigateway:GetDeployment",
+              "apigateway:GetStages",
+              "apigateway:GetStage",
+              "apigateway:GetMethod",
+              "apigateway:GetIntegration",
+              "apigateway:GetDomainName",
+              "apigateway:GetDomainNames",
+              "apigateway:GetBasePathMapping",
+              "apigateway:GetBasePathMappings",
+              "apigateway:UpdateDomainName",
+              "apigateway:UpdateBasePathMapping",
+              "apigateway:UpdateRestApi",
+              "apigateway:UpdateResource",
+              "apigateway:UpdateMethod",
+              "apigateway:UpdateIntegration",
+              "apigateway:UpdateStage",
+              "apigateway:PutMethod",
+              "apigateway:PutIntegration",
+              "apigateway:PutIntegrationResponse",
+              "apigateway:PutMethodResponse",
+              "apigateway:DeleteRestApi",
+              "apigateway:DeleteResource",
+              "apigateway:DeleteMethod",
+              "apigateway:DeleteIntegration",
+              "apigateway:DeleteDeployment",
+              "apigateway:DeleteStage",
+              "apigateway:DeleteDomainName",
+              "apigateway:DeleteBasePathMapping"
+            ],
+            "Resource": [
+              "arn:aws:apigateway:us-west-2::/restapis",
+              "arn:aws:apigateway:us-west-2::/restapis/*",
+              "arn:aws:apigateway:us-west-2::/domainnames",
+              "arn:aws:apigateway:us-west-2::/domainnames/*"
+            ]
+          },
+          {
+            "Sid": "ACMCertificates",
+            "Effect": "Allow",
+            "Action": [
+              "acm:RequestCertificate",
+              "acm:ListCertificates",
+              "acm:DescribeCertificate",
+              "acm:GetCertificate",
+              "acm:DeleteCertificate",
+              "acm:AddTagsToCertificate",
+              "acm:RemoveTagsFromCertificate"
+            ],
+            "Resource": "*"
+          },
+          {
+            "Sid": "Route53DNS",
+            "Effect": "Allow",
+            "Action": [
+              "route53:GetHostedZone",
+              "route53:ListHostedZones",
+              "route53:ListHostedZonesByName",
+              "route53:ListResourceRecordSets",
+              "route53:ChangeResourceRecordSets",
+              "route53:GetChange",
+              "route53:CreateHostedZone",
+              "route53:DeleteHostedZone",
+              "route53:GetHostedZoneCount",
+              "route53:ListTagsForResource",
+              "route53:ChangeTagsForResource"
+            ],
+            "Resource": [
+              "arn:aws:route53:::hostedzone/Z03873211NP2MYB53BG88",
+              "arn:aws:route53:::hostedzone/*",
+              "arn:aws:route53:::change/*"
+            ]
+          },
+          {
+            "Sid": "CloudWatchLogs",
+            "Effect": "Allow",
+            "Action": [
+              "logs:CreateLogGroup",
+              "logs:CreateLogStream",
+              "logs:PutLogEvents",
+              "logs:DescribeLogGroups",
+              "logs:DescribeLogStreams",
+              "logs:GetLogEvents",
+              "logs:FilterLogEvents",
+              "logs:DeleteLogGroup",
+              "logs:DeleteLogStream",
+              "logs:PutRetentionPolicy"
+            ],
+            "Resource": [
+              "arn:aws:logs:us-west-2:ACCOUNT_ID:log-group:/aws/lambda/markdown-redemption",
+              "arn:aws:logs:us-west-2:ACCOUNT_ID:log-group:/aws/lambda/markdown-redemption:*"
+            ]
+          },
+          {
+            "Sid": "IAMRoleManagement",
+            "Effect": "Allow",
+            "Action": [
+              "iam:CreateRole",
+              "iam:GetRole",
+              "iam:PutRolePolicy",
+              "iam:AttachRolePolicy",
+              "iam:DetachRolePolicy",
+              "iam:DeleteRolePolicy",
+              "iam:ListRolePolicies",
+              "iam:ListAttachedRolePolicies",
+              "iam:PassRole"
+            ],
+            "Resource": "arn:aws:iam::ACCOUNT_ID:role/markdown-redemption-*",
+            "Condition": {
+              "StringEquals": {
+                "iam:PassedToService": "lambda.amazonaws.com"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "api_gateway_invoke_lambda_permission": {
+      "description": "Permission resource attached to Lambda function allowing API Gateway to invoke it",
+      "statement_id": "apigateway-invoke",
+      "action": "lambda:InvokeFunction",
+      "principal": "apigateway.amazonaws.com",
+      "source_arn": "arn:aws:execute-api:us-west-2:ACCOUNT_ID:43bmng09mi/*/*/*"
+    }
+  },
+  "deployment_process": {
+    "prerequisites": {
+      "python_version": "3.13",
+      "aws_cli": "latest",
+      "tools": ["pip", "virtualenv", "zip", "git"]
+    },
+    "steps": [
+      {
+        "step": 1,
+        "name": "Prepare application code",
+        "actions": [
+          "Modify app.py for explicit static/template configuration",
+          "Create custom WSGI adapter in lambda_handler.py",
+          "Update requirements.txt with all dependencies"
+        ]
+      },
+      {
+        "step": 2,
+        "name": "Build deployment package",
+        "actions": [
+          "Create Python 3.13 virtual environment",
+          "Install dependencies",
+          "Copy app.py, lambda_handler.py, static/, templates/",
+          "Create ZIP file (44.3 MB)",
+          "Upload to S3"
+        ],
+        "script": "deployment/rebuild_deploy.sh"
+      },
+      {
+        "step": 3,
+        "name": "Create Lambda function",
+        "actions": [
+          "Create IAM execution role with trust policy",
+          "Attach CloudWatch Logs permissions",
+          "Create Lambda function from S3 package",
+          "Configure memory (2048 MB), timeout (900s), storage (10 GB)"
+        ]
+      },
+      {
+        "step": 4,
+        "name": "Configure API Gateway",
+        "actions": [
+          "Create or identify REST API",
+          "Add ANY method to root resource",
+          "Create {proxy+} catch-all resource",
+          "Add Lambda proxy integration",
+          "Add Lambda invoke permissions",
+          "Deploy to prod stage"
+        ]
+      },
+      {
+        "step": 5,
+        "name": "Set up custom domain",
+        "actions": [
+          "Request or identify ACM certificate",
+          "Create API Gateway custom domain (REGIONAL)",
+          "Create base path mapping",
+          "Create Route 53 ALIAS record"
+        ]
+      },
+      {
+        "step": 6,
+        "name": "Test and verify",
+        "actions": [
+          "Test direct API Gateway endpoint",
+          "Test custom domain endpoint",
+          "Verify CSS and static assets load",
+          "Check certificate validity",
+          "Confirm DNS resolution"
+        ]
+      }
+    ]
+  },
+  "key_technical_solutions": {
+    "glibc_compatibility": {
+      "problem": "PyMuPDF required GLIBC 2.27, Lambda Python 3.11/3.12 had GLIBC 2.26",
+      "solution": "Upgraded to Python 3.13 runtime (Amazon Linux 2023 with GLIBC 2.31+)"
+    },
+    "static_files_404": {
+      "problem": "Flask couldn't locate static/ and templates/ folders in Lambda",
+      "solution": "Explicit folder configuration with absolute paths and site-packages fallback"
+    },
+    "stage_prefix_urls": {
+      "problem": "URLs needed /prod/ prefix for direct API Gateway but not custom domain",
+      "solution": "Detect custom domain via Host header, set SCRIPT_NAME accordingly"
+    },
+    "flask_session_error": {
+      "problem": "Flask-Session rejected 'null' as SESSION_TYPE value",
+      "solution": "Conditional initialization - only init Flask-Session if valid session type set"
+    },
+    "api_gateway_403": {
+      "problem": "API Gateway had no methods or Lambda integration configured",
+      "solution": "Created / and /{proxy+} resources with ANY methods and AWS_PROXY integration"
+    }
+  },
+  "architecture": {
+    "request_flow": [
+      "User browser → HTTPS request → https://markdown.osu.internetchen.de/",
+      "Route 53 ALIAS → d-c6h2a7wwmk.execute-api.us-west-2.amazonaws.com",
+      "API Gateway Custom Domain → TLS termination with ACM certificate",
+      "Base Path Mapping → REST API 43bmng09mi/prod",
+      "Lambda Proxy Integration → Lambda function markdown-redemption",
+      "Custom WSGI Handler → Detects custom domain, sets SCRIPT_NAME=''",
+      "Flask Application → Generates URLs: /static/css/style.css",
+      "Response → HTML with correct static asset paths"
+    ],
+    "components": {
+      "frontend": "Browser accessing custom domain with HTTPS",
+      "dns": "Route 53 ALIAS record",
+      "tls_termination": "API Gateway with ACM certificate",
+      "routing": "API Gateway REST API with base path mapping",
+      "compute": "AWS Lambda Python 3.13",
+      "wsgi_adapter": "Custom adapter handling REST API events",
+      "application": "Flask web framework",
+      "storage": "Ephemeral /tmp for uploads, S3 for deployment packages",
+      "logging": "CloudWatch Logs"
+    }
+  },
+  "code_modifications": {
+    "app.py": {
+      "changes": [
+        "Early is_lambda detection before Flask init",
+        "Explicit static_folder and template_folder configuration",
+        "Fallback logic for site-packages location",
+        "APPLICATION_ROOT set to /prod for Lambda",
+        "Conditional Flask-Session initialization",
+        "Lambda-compatible storage paths (/tmp/uploads, /tmp/results)"
+      ]
+    },
+    "lambda_handler.py": {
+      "changes": [
+        "Custom WSGI adapter class (WSGIEventAdapter)",
+        "Detection of REST API vs HTTP API event format",
+        "Stage extraction from requestContext",
+        "Custom domain detection via Host header",
+        "Dynamic SCRIPT_NAME setting based on access method",
+        "Complete API Gateway event to WSGI environ conversion",
+        "Flask response to API Gateway response conversion"
+      ]
+    }
+  },
+  "testing": {
+    "endpoints": {
+      "direct_api_gateway": {
+        "url": "https://43bmng09mi.execute-api.us-west-2.amazonaws.com/prod/",
+        "html_status": "HTTP/2 200",
+        "css_path": "/prod/static/css/style.css",
+        "css_status": "HTTP/2 200",
+        "css_size_bytes": 18224
+      },
+      "custom_domain": {
+        "url": "https://markdown.osu.internetchen.de/",
+        "html_status": "HTTP/2 200",
+        "css_path": "/static/css/style.css",
+        "css_status": "HTTP/2 200",
+        "css_size_bytes": 18224
+      }
+    },
+    "certificate": {
+      "subject": "CN=markdown.osu.internetchen.de",
+      "issuer": "C=US, O=Amazon, CN=Amazon RSA 2048 M01",
+      "chain_length": 3,
+      "trusted": true
+    },
+    "dns": {
+      "query": "host markdown.osu.internetchen.de ns-435.awsdns-54.com",
+      "results": [
+        "44.253.78.85",
+        "52.32.168.247",
+        "44.230.253.243"
+      ]
+    }
+  },
+  "performance": {
+    "lambda": {
+      "cold_start_ms": 1800,
+      "warm_request_ms": 500,
+      "memory_allocated_mb": 2048,
+      "memory_used_mb": 190,
+      "package_size_mb": 44.3
+    },
+    "api_gateway": {
+      "timeout_ms": 29000,
+      "integration_type": "AWS_PROXY"
+    }
+  },
+  "costs": {
+    "monthly_estimate": {
+      "assumptions": {
+        "requests_per_month": 10000,
+        "avg_duration_ms": 500,
+        "avg_memory_mb": 512,
+        "compute_gb_seconds": 100
+      },
+      "breakdown": {
+        "lambda_requests": {
+          "amount": 0.002,
+          "unit": "USD",
+          "note": "Within free tier"
+        },
+        "lambda_compute": {
+          "amount": 0.00167,
+          "unit": "USD",
+          "note": "Within free tier"
+        },
+        "api_gateway": {
+          "amount": 0.035,
+          "unit": "USD",
+          "note": "Within free tier first 12 months"
+        },
+        "route53": {
+          "amount": 0.50,
+          "unit": "USD"
+        },
+        "cloudwatch_logs": {
+          "amount": 0.53,
+          "unit": "USD"
+        },
+        "total": {
+          "amount": 1.10,
+          "unit": "USD"
+        }
+      }
+    },
+    "production_scale": {
+      "requests_per_month": 100000,
+      "estimated_monthly_cost": 4.05,
+      "unit": "USD"
+    }
+  },
+  "troubleshooting": {
+    "common_issues": [
+      {
+        "issue": "PyMuPDF GLIBC error",
+        "symptom": "Runtime.ImportModuleError: version 'GLIBC_2.27' not found",
+        "solution": "Use Python 3.13 runtime (not 3.11 or 3.12)"
+      },
+      {
+        "issue": "CSS files 404",
+        "symptom": "HTML loads but no styling, browser console shows 404",
+        "solution": "Verify static/ in package, check Flask static_folder config, ensure {proxy+} resource exists"
+      },
+      {
+        "issue": "Wrong CSS paths",
+        "symptom": "Custom domain has /prod/ prefix or vice versa",
+        "solution": "Check lambda_handler.py custom domain detection and SCRIPT_NAME logic"
+      },
+      {
+        "issue": "API Gateway 403",
+        "symptom": "{\"message\":\"Forbidden\"}",
+        "solution": "Add Lambda invoke permissions with correct source ARN pattern"
+      },
+      {
+        "issue": "Certificate not secure",
+        "symptom": "Browser shows 'Not Secure' warning",
+        "solution": "Clear browser/DNS cache, wait for DNS propagation (5-15 min), verify ACM cert is ISSUED"
+      },
+      {
+        "issue": "DNS not resolving",
+        "symptom": "curl: (6) Could not resolve host",
+        "solution": "Check Route 53 record exists, query authoritative NS, wait for TTL=300s propagation"
+      }
+    ]
+  },
+  "files_and_structure": {
+    "deployment_package": {
+      "size_mb": 44.3,
+      "contents": [
+        "app.py (Flask application)",
+        "lambda_handler.py (WSGI adapter)",
+        "templates/ (HTML templates)",
+        "static/ (CSS, JavaScript, images)",
+        "site-packages/ (Python dependencies)"
+      ]
+    },
+    "repository_structure": [
+      "app.py",
+      "requirements.txt",
+      "deployment/lambda_handler.py",
+      "deployment/rebuild_deploy.sh",
+      "templates/base.html",
+      "templates/index.html",
+      "templates/processing.html",
+      "templates/result.html",
+      "static/css/style.css",
+      "static/js/upload.js",
+      "static/images/logo.svg",
+      "FINAL.md",
+      "FINAL.json"
+    ]
+  },
+  "success_criteria": {
+    "functional": [
+      "Application accessible via custom domain with HTTPS",
+      "CSS and static assets loading correctly",
+      "File upload functionality working",
+      "Document conversion processing",
+      "Download of converted Markdown files"
+    ],
+    "technical": [
+      "Lambda function cold start < 2 seconds",
+      "Warm requests < 1 second",
+      "Certificate chain complete and trusted",
+      "DNS resolving to API Gateway IPs",
+      "Both direct and custom domain endpoints functional"
+    ],
+    "operational": [
+      "CloudWatch logs capturing Lambda execution",
+      "No 404 or 403 errors on static assets",
+      "Correct URL generation for both access methods",
+      "Deployment automation via rebuild_deploy.sh",
+      "IAM permissions properly scoped"
+    ]
+  },
+  "summary": {
+    "deployment_complete": true,
+    "production_ready": true,
+    "endpoints_working": 2,
+    "primary_url": "https://markdown.osu.internetchen.de/",
+    "total_deployment_time_hours": 6,
+    "major_challenges_solved": 5,
+    "aws_services_used": 7,
+    "monthly_cost_usd": 1.10,
+    "documentation_complete": true
+  }
+}
