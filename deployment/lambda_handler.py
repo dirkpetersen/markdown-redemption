@@ -32,11 +32,14 @@ class WSGIEventAdapter:
             method = http_info.get('method', 'GET')
             path = http_info.get('path', '/')
             source_ip = http_info.get('sourceIp', '127.0.0.1')
+            stage = ''
         else:
             # REST API format
             method = self.event.get('httpMethod', 'GET')
             path = self.event.get('path', '/')
             source_ip = self.event.get('requestContext', {}).get('identity', {}).get('sourceIp', '127.0.0.1')
+            # Get stage from requestContext
+            stage = self.event.get('requestContext', {}).get('stage', '')
 
         # Parse query string
         query_string = self.event.get('rawQueryString', '') or \
@@ -53,10 +56,21 @@ class WSGIEventAdapter:
             body = body.encode('utf-8') if isinstance(body, str) else body
 
         # Build environ
+        # For REST API, stage is in requestContext and already stripped from path
+        # Set SCRIPT_NAME to /stage so Flask generates correct URLs
+        script_name = f'/{stage}' if stage and stage != '$default' else ''
+        path_info = unquote(path)
+
+        # Debug logging
+        print(f"[WSGI] Stage: {stage}")
+        print(f"[WSGI] Original path: {path}")
+        print(f"[WSGI] SCRIPT_NAME: {script_name}")
+        print(f"[WSGI] PATH_INFO: {path_info}")
+
         environ = {
             'REQUEST_METHOD': method,
-            'SCRIPT_NAME': '',
-            'PATH_INFO': unquote(path),
+            'SCRIPT_NAME': script_name,
+            'PATH_INFO': path_info,
             'QUERY_STRING': query_string,
             'CONTENT_TYPE': headers.get('content-type', 'application/x-www-form-urlencoded'),
             'CONTENT_LENGTH': str(len(body)),

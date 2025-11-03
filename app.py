@@ -56,6 +56,11 @@ if is_lambda or os.getenv('DEBUG_PATHS'):
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'change-this-to-a-random-secret-key')
 app.config['MAX_CONTENT_LENGTH'] = int(os.getenv('MAX_UPLOAD_SIZE', 104857600))  # Default: 100MB
 
+# API Gateway stage prefix handling
+# When behind API Gateway, the stage name (e.g., /prod/) needs to be in all URLs
+if is_lambda:
+    app.config['APPLICATION_ROOT'] = '/prod'
+
 # Lambda-compatible storage paths (use /tmp in Lambda environment)
 default_upload_folder = '/tmp/uploads' if is_lambda else 'uploads'
 default_result_folder = '/tmp/results' if is_lambda else 'results'
