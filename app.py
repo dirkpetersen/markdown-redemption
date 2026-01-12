@@ -124,6 +124,13 @@ def normalize_endpoint(endpoint):
 LLM_ENDPOINT = normalize_endpoint(LLM_ENDPOINT)
 
 # Helper functions
+def get_model_name(model_string):
+    """Extract model name from LLM_MODEL string
+    Returns the part after the last forward slash, or the whole string if no slashes"""
+    if '/' in model_string:
+        return model_string.rsplit('/', 1)[1]
+    return model_string
+
 def allowed_file(filename):
     """Check if file extension is allowed"""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -492,7 +499,7 @@ def process_file(file_path, original_filename, conversion_mode='auto'):
 def index():
     """Display upload page"""
     cleanup_old_files()
-    
+
     return render_template(
         'index.html',
         app_name=APP_NAME,
@@ -500,7 +507,8 @@ def index():
         theme_color=THEME_COLOR,
         max_size_mb=app.config['MAX_CONTENT_LENGTH'] // (1024 * 1024),
         max_files=MAX_CONCURRENT_UPLOADS,
-        allowed_extensions=', '.join(sorted(ALLOWED_EXTENSIONS))
+        allowed_extensions=', '.join(sorted(ALLOWED_EXTENSIONS)),
+        model_name=get_model_name(LLM_MODEL)
     )
 
 @app.route('/upload', methods=['POST'])
